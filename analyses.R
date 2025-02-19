@@ -125,7 +125,7 @@ ggplot(pitfall.dat, aes(x = site_type, y = species_richness)) +
 
 
 
-# Statistical Analyses ----
+## Statistical Analyses ----
 
 # compare total abundance of ants between the two site types.
 
@@ -155,13 +155,34 @@ chisq.test(pitfall.dat$species_richness, pitfall.dat$site_type)
 
 # p-value = 0.3036 (>0.05), thus, we fail to reject the null hypothesis that there is no relationship between the site type and the species richness.
 
-# Assessing the relationship between quadrat variables and species richness/abundance ----
+# Assessing correlation between quadrat variables and species richness/total abundance ----
 
-# need to merge pitfall and quadrat data into 1 dataframe.
-# adding the quadrat data to the pitfall data frame:
+# separate the 4 columns of quadrat data from quad.dat into a new data frame:
+quad_vars <- quad.dat %>%
+  select(live.veg.pcover, leaf.litter.pcover, bare.ground.pcover, rocks.stones.pcover)
 
-pitfall.quad.dat <- pitfall.dat %>%
-  cross_join(quad.dat[,2:5])
+# combine quad_vars with the pitfall.dat
+pitfall.quad.dat <- cbind(pitfall.dat, quad_vars)
+ 
 
-# check the new data frame for errors. 
-view(pitfall.quad.dat)
+# run correlation tests between quadrat variables and species richness:
+
+cor.test(pitfall.quad.dat$live.veg.pcover, pitfall.quad.dat$species_richness)
+
+cor.test(pitfall.quad.dat$leaf.litter.pcover, pitfall.quad.dat$species_richness)
+ 
+cor.test(pitfall.quad.dat$bare.ground.pcover, pitfall.quad.dat$species_richness)
+
+cor.test(pitfall.quad.dat$rocks.stones.pcover, pitfall.quad.dat$species_richness)
+ 
+
+# run correlation tests between quadrat variables and total abundances:
+ 
+cor.test(pitfall.quad.dat$live.veg.pcover, pitfall.quad.dat$total_abundance)
+ 
+cor.test(pitfall.quad.dat$leaf.litter.pcover, pitfall.quad.dat$total_abundance)
+ 
+cor.test(pitfall.quad.dat$bare.ground.pcover, pitfall.quad.dat$total_abundance)
+ 
+cor.test(pitfall.quad.dat$rocks.stones.pcover, pitfall.quad.dat$total_abundance)
+
