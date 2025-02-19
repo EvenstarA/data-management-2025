@@ -204,9 +204,45 @@ We will use the *cor.test* function from base R to calculate the correlation coe
 
 We will merge the quadrat data into the pitfall trap data to allow us to more easily analyse the data. However, we only need select columns from the quadrat data, as the pitfall trap tags (i.e. G.2.4) are common to both data frames. We also already have the site types in our pitfall trap data frame.
 
-In reality, we only need columns 2 to 5 from the quadrat data frame; so we'll only tack those onto the main pitfall data frame, and rename it to pitfall.quad.dat so that we know what is in that data frame. We'll use the *cross_join* function to do this.
+In reality, we only need columns 2 to 5 from the quadrat data frame; so we'll only tack those onto the main pitfall data frame. To do this, we'll extract the columns we want into a new variable, then bind them to the pitfall data. ***This only works well because we haven't jumbled the order of either data set, so if we copy the columns directly across, they will correspond to the correct sites/pitfall traps.***
 
 ```{r}
-pitfall.quad.dat <- pitfall.dat %>%
-  cross_join(quad.dat[,2:5])
+# separate the 4 columns of quadrat data from quad.dat into a new data frame:
+quad_vars <- quad.dat %>%
+  select(live.veg.pcover, leaf.litter.pcover, bare.ground.pcover, rocks.stones.pcover)
+
+# combine quad_vars with the pitfall.dat
+pitfall.quad.dat <- cbind(pitfall.dat, quad_vars)
 ```
+
+Now we'll run correlation tests on quadrat variables and species richness:
+
+```{r}
+
+cor.test(pitfall.quad.dat$live.veg.pcover, pitfall.quad.dat$species_richness)
+
+cor.test(pitfall.quad.dat$leaf.litter.pcover, pitfall.quad.dat$species_richness)
+ 
+cor.test(pitfall.quad.dat$bare.ground.pcover, pitfall.quad.dat$species_richness)
+
+cor.test(pitfall.quad.dat$rocks.stones.pcover, pitfall.quad.dat$species_richness)
+
+```
+
+From this we can see that the relationship between live vegetation cover, bare ground cover and species richness is positive, but not statistically significant. The relationship between leaf litter and rocks/stones is negative but not statistically significant.
+
+For total abundance:
+
+```{r}
+cor.test(pitfall.quad.dat$live.veg.pcover, pitfall.quad.dat$total_abundance)
+ 
+cor.test(pitfall.quad.dat$leaf.litter.pcover, pitfall.quad.dat$total_abundance)
+ 
+cor.test(pitfall.quad.dat$bare.ground.pcover, pitfall.quad.dat$total_abundance)
+ 
+cor.test(pitfall.quad.dat$rocks.stones.pcover, pitfall.quad.dat$total_abundance)
+```
+
+Here, we can see some interesting results!! The correlation between live vegetation and total abundance is positive and statistically significant! Also, leaf litter and total abundance is negatively correlated and statistically significant. However, both bare ground and rocks/stones aren't statistically significant and are negatively and positively correlated, respectively.
+
+But, keep in mind that correlation does not imply causation!
