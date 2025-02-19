@@ -42,7 +42,27 @@ sum(is.na(pitfall.dat))
 sum(duplicated(quad.dat))
 sum(duplicated(pitfall.dat))
 
-# Suggested Analyses:
+# Branch Point 1: suggested analyses: ----
 # We want to see what the relationship is between site (i.e. fynbos and eucalyptus gums), total abundance, and species richness.
+# We will use the ggplot2 package to create a bar plot of the total abundance of ants per site, and a scatter plot of species richness per site. 
+
+### total abundances per site----
+
+# we want to generate the total abundance of ants per site; i.e. sum the observed species counts per row. Thus we need to sum across the columns of the data set. We will do this using the mutate function from the dplyr package. 
+
+pitfall_total_abundance <- pitfall.dat %>%
+  group_by(pitfall) %>%
+  mutate(total_abundance = rowSums(across(everything())))
+
+### total species richness per site ----
+
+# Now we want to generate the total species richness per site. For this we need to count how many columns have a value greater than 0 (i.e. the species was detected), and have each occurrence of >0 logged as a count. Then we sum those counts for each row, to obtain the number of species found per site.
+
+pitfall_species_richness <- pitfall.dat %>%
+  group_by(pitfall) %>%
+  mutate(species_richness = rowSums(across(everything()) > 0))
+
+# Now we will create the plots
+
 
 
