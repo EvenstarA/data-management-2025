@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Arwenn Kummer">
+
+<title>Step By Step Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="analyses_quarto_files/libs/clipboard/clipboard.min.js"></script>
+<script src="analyses_quarto_files/libs/quarto-html/quarto.js"></script>
+<script src="analyses_quarto_files/libs/quarto-html/popper.min.js"></script>
+<script src="analyses_quarto_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="analyses_quarto_files/libs/quarto-html/anchor.min.js"></script>
+<link href="analyses_quarto_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="analyses_quarto_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="analyses_quarto_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="analyses_quarto_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="analyses_quarto_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Step By Step Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Arwenn Kummer </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="data-analysis---user-friendly-step-by-step-version." class="level2">
+<h2 class="anchored" data-anchor-id="data-analysis---user-friendly-step-by-step-version.">Data Analysis - user friendly step-by-step version.</h2>
+<p>The data set we’re about to analyse involves the species names and counts of ants from pitfall traps, collected from two vegetation types: Fynbos and a stand of Eucalyptus/gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the sample site where each pitfall trap was placed.</p>
+</section>
+<section id="pre-analysis-work" class="level2">
+<h2 class="anchored" data-anchor-id="pre-analysis-work">Pre-Analysis work</h2>
+<p>We will use the packages <em>tidyverse</em> and <em>readxl</em> to load and analyse our data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="data-wrangling-cleaning-and-checks" class="level2">
+<h2 class="anchored" data-anchor-id="data-wrangling-cleaning-and-checks">Data Wrangling, Cleaning and Checks</h2>
+<p>We have data on soil surface features (quadrat_data_clean), species counts and species names (pitfall_data_clean). We will read in each data sheet, clean it up a bit more and reorganize it for analysis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>quad.dat <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"quadrat_data_clean.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(quad.dat)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>pitfall.dat <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"pitfall_data_clean.csv"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(pitfall.dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Checking variables</strong>: we want to confirm that variables are the correct format/type (i.e.&nbsp;<em>chr</em> for sites, and <em>int</em> for the counts).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(quad.dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   32 obs. of  5 variables:
+ $ site                     : chr  "G.1.1" "G.1.2" "G.1.3" "G.1.4" ...
+ $ live.veg..perc.cover.    : int  15 1 5 5 20 40 10 5 0 5 ...
+ $ litter..perc.cover.      : int  70 69 45 93 65 60 60 75 80 94 ...
+ $ bare.ground..perc.cover. : int  10 10 30 0 10 0 20 15 5 0 ...
+ $ rocks.stones..perc.cover.: int  5 20 20 2 5 0 10 5 15 1 ...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(pitfall.dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   32 obs. of  15 variables:
+ $ pitfall         : chr  "G.1.1" "G.1.2" "G.1.3" "G.1.4" ...
+ $ camponotus.sp   : int  2 0 0 0 0 0 0 0 0 0 ...
+ $ ocymyrmex.sp    : int  1 0 1 0 0 0 0 1 0 0 ...
+ $ technomyrmex.sp : int  1 0 0 0 0 0 0 0 0 0 ...
+ $ agraulomyrmex.sp: int  1 2 7 15 0 1 0 6 0 2 ...
+ $ monomorium.sp1  : int  1 1 2 0 0 0 0 2 2 0 ...
+ $ monomorium.sp2  : int  0 0 0 0 1 0 0 1 0 0 ...
+ $ pheidole.sp1    : int  3 0 0 6 0 0 0 1 14 0 ...
+ $ pheidole.sp2    : int  7 9 2 9 3 7 3 26 22 8 ...
+ $ pheidole.sp3    : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ lepisiota.sp1   : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ lepisiota.sp2   : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ pachycondyla.sp : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ pyramica.sp     : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ unknown.sp      : int  0 0 0 0 0 0 0 0 0 0 ...</code></pre>
+</div>
+</div>
+<p>That all looks good, except for one thing…<br>
+<strong>quad.dat column names</strong> - the column names for the quadrat data are confusing with all those full-stops. Let’s simplify the names, but keep the fact that these values are a percentage of total coverage explicit (using .pcover)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(quad.dat) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"live.veg.pcover"</span>, <span class="st">"leaf.litter.pcover"</span>, <span class="st">"bare.ground.pcover"</span>, <span class="st">"rocks.stones.pcover"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next we will confirm that there are no “empty” observations (i.e.&nbsp;missing values), and no duplicates.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## check for missing values ----</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(quad.dat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(pitfall.dat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">## check for duplicates ----</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(quad.dat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(pitfall.dat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>No missing values, and no duplicated values either! Yay! Now we can proceed with organizing and manipulating our data frames prior to visualization and analysis.</p>
+</section>
+<section id="organization" class="level2">
+<h2 class="anchored" data-anchor-id="organization">Organization:</h2>
+<p>We want to see what the relationship is between vegetation type (i.e.&nbsp;fynbos or eucalyptus gums), total abundance, and species richness. We will use the <em>ggplot2</em> package to create bar plots and boxplots that show the total abundance and species richness of ants per pitfall/sample site, as well as between vegetation types. But before we do this, we need to calculate some values of total abundance and species richness for each trap. We have the raw counts for each trap, but don’t have these two important values.</p>
+<section id="total-abundance-per-sample-sitepitfall-trap" class="level4">
+<h4 class="anchored" data-anchor-id="total-abundance-per-sample-sitepitfall-trap">Total abundance per sample site/pitfall trap</h4>
+<p>We want to generate the total abundance of ants per pitfall; i.e.&nbsp;we need to sum the observed species counts per row, by summing across the columns of the data set. We will do this using the <strong>mutate</strong> function from the <em>dplyr</em> package:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pitfall_total_abundance <span class="ot">&lt;-</span> pitfall.dat <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(pitfall) <span class="sc">%&gt;%</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">total_abundance =</span> <span class="fu">rowSums</span>(<span class="fu">across</span>(<span class="fu">everything</span>())))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="species-richness-per-sample-sitepitfall-trap" class="level4">
+<h4 class="anchored" data-anchor-id="species-richness-per-sample-sitepitfall-trap">Species richness per sample site/pitfall trap</h4>
+<p>Similarly, we want to generate the species richness per pitfall. For this we need to count how many columns have a value greater than 0 (i.e.&nbsp;the species was detected), and have each occurrence of &gt;0 logged as a count. Then we sum those counts for each row, to obtain the number of species found per pitfall. Again, we’ll use the <strong>mutate</strong> function:</p>
+<p>Now we want to combine both the species richness and total abundance columns onto the original data set of pitfall trap data. We will do this using the <strong>left_join</strong> function from <em>tidyverse</em>.</p>
+<p>This sets us up with some great variables to use in our visualization and analysis. But what about comparing differences <u>between</u> the two vegetation types, eucalyptus and fynbos?</p>
+</section>
+<section id="grouping-sites-within-the-same-vegetation-types" class="level4">
+<h4 class="anchored" data-anchor-id="grouping-sites-within-the-same-vegetation-types">Grouping sites within the same vegetation types</h4>
+<p>If we want to detect any larger patterns by comparing all pitfalls from the eucalyptus stand with all the pitfalls from the Fynbos, we need to create a new column with a factor for vegetation type, and assign a level (G for eucalyptus/gums, F for Fynbos) for each pitfall trap. We will do this using the <strong>mutate</strong> and <strong>str_detect</strong> function to assign the factor levels to each row if the corresponding letter ‘G’ or ‘F’ are detected.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>pitfall.dat <span class="ot">&lt;-</span> pitfall.dat <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">veg_type =</span> <span class="fu">case_when</span> (</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_detect</span>(pitfall, <span class="st">"G"</span>) <span class="sc">~</span> <span class="st">"G"</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_detect</span>(pitfall, <span class="st">"F"</span>) <span class="sc">~</span> <span class="st">"F"</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now let’s check that the new variable is a factor with two levels:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(pitfall.dat) <span class="co"># veg_type comes up as a character variable. Let's change that.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   32 obs. of  18 variables:
+ $ pitfall         : chr  "G.1.1" "G.1.2" "G.1.3" "G.1.4" ...
+ $ camponotus.sp   : int  2 0 0 0 0 0 0 0 0 0 ...
+ $ ocymyrmex.sp    : int  1 0 1 0 0 0 0 1 0 0 ...
+ $ technomyrmex.sp : int  1 0 0 0 0 0 0 0 0 0 ...
+ $ agraulomyrmex.sp: int  1 2 7 15 0 1 0 6 0 2 ...
+ $ monomorium.sp1  : int  1 1 2 0 0 0 0 2 2 0 ...
+ $ monomorium.sp2  : int  0 0 0 0 1 0 0 1 0 0 ...
+ $ pheidole.sp1    : int  3 0 0 6 0 0 0 1 14 0 ...
+ $ pheidole.sp2    : int  7 9 2 9 3 7 3 26 22 8 ...
+ $ pheidole.sp3    : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ lepisiota.sp1   : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ lepisiota.sp2   : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ pachycondyla.sp : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ pyramica.sp     : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ unknown.sp      : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ total_abundance : num  16 12 12 30 4 8 3 37 38 10 ...
+ $ species_richness: num  7 3 4 3 2 2 1 6 3 2 ...
+ $ veg_type        : chr  "G" "G" "G" "G" ...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pitfall.dat<span class="sc">$</span>veg_type <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(pitfall.dat<span class="sc">$</span>veg_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we’re pretty much fully prepped to get into visualization and analysis!</p>
+</section>
+<section id="data-visualization" class="level3">
+<h3 class="anchored" data-anchor-id="data-visualization">Data visualization:</h3>
+<p>First, we want to see if there are any general differences between the pitfall traps/sample sites themselves, and between the broader vegetation types.</p>
+<section id="total-abundance-per-sample-and-between-vegetation-types" class="level4">
+<h4 class="anchored" data-anchor-id="total-abundance-per-sample-and-between-vegetation-types">Total abundance per sample and between vegetation types:</h4>
+<p>Let’s generate a bar-chart that will display the total abundance per pitfall trap, and a box-plot to compare total abundance between the two vegetation types:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pitfall.dat, <span class="fu">aes</span>(<span class="at">x =</span> pitfall, <span class="at">y =</span> total_abundance)) <span class="sc">+</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Total abundance (count) of ants per pitfall trap"</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Pitfall trap"</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Total abundance (count)"</span>) <span class="sc">+</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analyses_quarto_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pitfall.dat, <span class="fu">aes</span>(<span class="at">x =</span> veg_type, <span class="at">y =</span> total_abundance)) <span class="sc">+</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Total abundance of ants (count) between vegetation types"</span>,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Vegetation type"</span>,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Total Abundance (count)"</span>) <span class="sc">+</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analyses_quarto_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="species-richness-per-sample-and-between-vegetation-types" class="level4">
+<h4 class="anchored" data-anchor-id="species-richness-per-sample-and-between-vegetation-types">Species richness per sample and between vegetation types:</h4>
+<p>We’ll do the same for species richness:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pitfall.dat, <span class="fu">aes</span>(<span class="at">x =</span> pitfall, <span class="at">y =</span> species_richness)) <span class="sc">+</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Species richness per pitfall trap"</span>,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Pitfall trap"</span>,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Species Richness"</span>) <span class="sc">+</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analyses_quarto_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pitfall.dat, <span class="fu">aes</span>(<span class="at">x =</span> veg_type, <span class="at">y =</span> species_richness)) <span class="sc">+</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Species richness between vegetation types"</span>,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Vegetation type"</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Species Richness"</span>) <span class="sc">+</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analyses_quarto_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now that we have a visual idea of what the data are doing, let’s run some formal statistical tests on the data to determine any relationships or correlations.</p>
+</section>
+</section>
+</section>
+<section id="statistical-analyses" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-analyses">Statistical analyses</h2>
+<p>First, we will use the <strong>t.test</strong> function from base R to compare the total abundance of ants between the two vegetation types.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(total_abundance <span class="sc">~</span> veg_type, <span class="at">data =</span> pitfall.dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  total_abundance by veg_type
+t = 1.5525, df = 16.401, p-value = 0.1396
+alternative hypothesis: true difference in means between group F and group G is not equal to 0
+95 percent confidence interval:
+ -7.889391 51.389391
+sample estimates:
+mean in group F mean in group G 
+        38.5625         16.8125 </code></pre>
+</div>
+</div>
+<p>Here, the p-value is 0.1396, which is greater than the significance level of 0.05. Thus, we fail to reject the null hypothesis that there is no difference in the total abundance of ants between the two site types.</p>
+<p>In plain words, there is no statistically significant support for a difference in total abundance between the two vegetation types.</p>
+<p>Another test we can run is a <em>chi-squared test of independence</em> to see if there is a relationship between the vegetation type and species richness. We will use the <strong>chisq.test</strong> function from base R for this.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chisq.test</span>(pitfall.dat<span class="sc">$</span>species_richness, pitfall.dat<span class="sc">$</span>veg_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in chisq.test(pitfall.dat$species_richness, pitfall.dat$veg_type):
+Chi-squared approximation may be incorrect</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's Chi-squared test
+
+data:  pitfall.dat$species_richness and pitfall.dat$veg_type
+X-squared = 7.1909, df = 6, p-value = 0.3036</code></pre>
+</div>
+</div>
+<p>Here, the p-value is 0.3036 which is greater than the significance level of 0.05. Thus, we fail to reject the null hypothesis that there is no relationship between the site type and the species richness.</p>
+<p>Once again, in plain words, there is no statistically significant support for any difference in species richness between the two vegetation types.</p>
+<p>Since these two tests led to a dead end in determining if there’s a difference between the broader vegetation types, let’s dive deeper. Remember the quadrat data we collected? Let’s see if differences in these variables lead to any significant variations in species richness or abundance between the pitfall traps and their immediate environments.</p>
+<section id="quadrat-data-species-richness-and-total-abundance" class="level3">
+<h3 class="anchored" data-anchor-id="quadrat-data-species-richness-and-total-abundance">Quadrat data, species richness, and total abundance</h3>
+<p>We will use the <strong>cor.test</strong> function from base R to calculate the correlation coefficient between the total abundance and the quadrat variables.</p>
+<p><strong><em>However, at this point the pitfall and quadrat data are in two separate data frames.</em></strong></p>
+<p>We will merge the quadrat data into the pitfall trap data to allow us to more easily run an analysis. However, we only need certain columns from the quadrat data, as the pitfall trap tags (i.e.&nbsp;G.2.4) are common to both data frames. We also already have the site types (G or F) in our pitfall trap data frame.</p>
+<p>In reality, we only need columns 2 to 5 from the quad.dat data frame. To tack these onto the rest of our main data (stored in pitfall.dat), we’ll extract the columns we want into a new variable, then bind them to the pitfall data.</p>
+<p><strong><em>NB: This only works well because we haven’t jumbled the order or arrangement of either individual data set. Thus if we copy the columns directly across, they will correspond to the correct sites/pitfall traps.</em></strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># separate the 4 columns of quadrat data from quad.dat into a new data frame:</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>quad_vars <span class="ot">&lt;-</span> quad.dat <span class="sc">%&gt;%</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(live.veg.pcover, leaf.litter.pcover, bare.ground.pcover, rocks.stones.pcover)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="co"># combine quad_vars with the pitfall.dat</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>pitfall.quad.dat <span class="ot">&lt;-</span> <span class="fu">cbind</span>(pitfall.dat, quad_vars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note that I’ve distinguished that our new data set has <u>both</u> the pitfall and quadrat data, by naming the variable pitfall.quad.dat.</p>
+</section>
+<section id="correlation-tests" class="level3">
+<h3 class="anchored" data-anchor-id="correlation-tests">Correlation tests:</h3>
+<section id="species-richness-and-quadrat-data" class="level4">
+<h4 class="anchored" data-anchor-id="species-richness-and-quadrat-data">Species richness and quadrat data:</h4>
+<p>Now we can run correlation tests on the quadrat variables and species richness:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(pitfall.quad.dat<span class="sc">$</span>live.veg.pcover, pitfall.quad.dat<span class="sc">$</span>species_richness)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  pitfall.quad.dat$live.veg.pcover and pitfall.quad.dat$species_richness
+t = 0.14603, df = 30, p-value = 0.8849
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.3250634  0.3718893
+sample estimates:
+      cor 
+0.0266514 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(pitfall.quad.dat<span class="sc">$</span>leaf.litter.pcover, pitfall.quad.dat<span class="sc">$</span>species_richness)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  pitfall.quad.dat$leaf.litter.pcover and pitfall.quad.dat$species_richness
+t = -0.5888, df = 30, p-value = 0.5604
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.4392085  0.2511714
+sample estimates:
+       cor 
+-0.1068837 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(pitfall.quad.dat<span class="sc">$</span>bare.ground.pcover, pitfall.quad.dat<span class="sc">$</span>species_richness)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  pitfall.quad.dat$bare.ground.pcover and pitfall.quad.dat$species_richness
+t = 1.8312, df = 30, p-value = 0.07702
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.03555142  0.59948696
+sample estimates:
+      cor 
+0.3170732 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(pitfall.quad.dat<span class="sc">$</span>rocks.stones.pcover, pitfall.quad.dat<span class="sc">$</span>species_richness)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  pitfall.quad.dat$rocks.stones.pcover and pitfall.quad.dat$species_richness
+t = -0.47344, df = 30, p-value = 0.6393
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.4221347  0.2707061
+sample estimates:
+        cor 
+-0.08611672 </code></pre>
+</div>
+</div>
+<p>From this we can see that the relationship between live vegetation cover &amp; species richness, and bare ground cover &amp; species richness are positive, but not statistically significant. The relationship between leaf litter $ species richness, and rocks/stones &amp; species richness is negative, but also not statistically significant.</p>
+</section>
+<section id="total-abundance-and-quadrat-data" class="level4">
+<h4 class="anchored" data-anchor-id="total-abundance-and-quadrat-data">Total abundance and quadrat data:</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(pitfall.quad.dat<span class="sc">$</span>live.veg.pcover, pitfall.quad.dat<span class="sc">$</span>total_abundance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  pitfall.quad.dat$live.veg.pcover and pitfall.quad.dat$total_abundance
+t = 3.1068, df = 30, p-value = 0.004112
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.1747510 0.7184701
+sample estimates:
+     cor 
+0.493381 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(pitfall.quad.dat<span class="sc">$</span>leaf.litter.pcover, pitfall.quad.dat<span class="sc">$</span>total_abundance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  pitfall.quad.dat$leaf.litter.pcover and pitfall.quad.dat$total_abundance
+t = -2.7038, df = 30, p-value = 0.01118
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.6855342 -0.1111084
+sample estimates:
+       cor 
+-0.4426527 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(pitfall.quad.dat<span class="sc">$</span>bare.ground.pcover, pitfall.quad.dat<span class="sc">$</span>total_abundance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  pitfall.quad.dat$bare.ground.pcover and pitfall.quad.dat$total_abundance
+t = -1.4432, df = 30, p-value = 0.1593
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.5542486  0.1030522
+sample estimates:
+       cor 
+-0.2547976 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(pitfall.quad.dat<span class="sc">$</span>rocks.stones.pcover, pitfall.quad.dat<span class="sc">$</span>total_abundance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  pitfall.quad.dat$rocks.stones.pcover and pitfall.quad.dat$total_abundance
+t = 0.27547, df = 30, p-value = 0.7848
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.3037847  0.3920572
+sample estimates:
+       cor 
+0.05023005 </code></pre>
+</div>
+</div>
+<p>Here, we finally get some interesting results!! The correlation between live vegetation &amp; total abundance is positive and statistically significant! Also, leaf litter &amp;total abundance is negatively correlated and statistically significant. Both bare ground &amp; total abundance, and rocks/stones &amp; total abundance aren’t statistically significant and are negatively and positively correlated, respectively. Just remember that correlation does not imply causation!</p>
+<p>This brings us to the end of our sample analyses! Thanks for reading, and happy analyses!</p>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

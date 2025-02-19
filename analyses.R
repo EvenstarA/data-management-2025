@@ -7,7 +7,7 @@
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 # Preamble:
-# The data set we will analyse involves analyzing the species and counts of trapped ants, across two different sites - Fynbos and Eucalyptus/Gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the area where each pitfall trap was placed. 
+# The data set we will analyse involves analyzing the species and counts of pitfall trapped ants, across two different vegetation types - Fynbos and Eucalyptus/Gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the sample site where each pitfall trap was placed. 
 
 
 # Pre-analysis ----
@@ -44,118 +44,108 @@ sum(is.na(pitfall.dat))
 sum(duplicated(quad.dat))
 sum(duplicated(pitfall.dat))
 
-# Suggested analyses - Branch Point 1: ----
 
-### total abundances per site----
 
-# create a new column with the total abundance per site.
+# Suggested analyses (Branch Point 1 in GitHub log): ----
+
+### total abundances per sample site/pitfall trap----
+
+# create a new column with the total abundance per trap
 
 pitfall_total_abundance <- pitfall.dat %>%
   group_by(pitfall) %>%
   mutate(total_abundance = rowSums(across(everything())))
 
-### total species richness per site ----
+### total species richness per sample site/pitfall trap ----
 
-# createa new column with species richness per site. 
+# create a new column with species richness per trap 
 
 pitfall_species_richness <- pitfall.dat %>%
   group_by(pitfall) %>%
   mutate(species_richness = rowSums(across(everything()) > 0))
 
-# combine abundance, species richness and original pitfall data into 1 data frame:
+# combine abundance, species richness and original pitfall data into original data frame:
 pitfall.dat <- pitfall.dat %>%
   left_join(pitfall_total_abundance) %>%
   left_join(pitfall_species_richness)
 
-# generate a new column of factors for each site type: G for gum/eucalyptus, and F for fynbos. 
+# generate a new column of factors for each vegetation type: G for gum/eucalyptus, and F for fynbos. 
 
 pitfall.dat <- pitfall.dat %>%
-  mutate(site_type = case_when (
+  mutate(veg_type = case_when (
     str_detect(pitfall, "G") ~ "G",
     str_detect(pitfall, "F") ~ "F"
   ))
 
 # check new variable site_type is a factor with 2 levels:
 str(pitfall.dat)
-pitfall.dat$site_type <- as.factor(pitfall.dat$site_type)
-
+pitfall.dat$veg_type <- as.factor(pitfall.dat$veg_type)
 str(pitfall.dat) # site_type is now a factor
 
 
 
 # Data Visualization: ----
-# Now we are all set to create the plots. We will use the ggplot2 package from tidyverse as well for this.
 
+## Total Abundance plots:----
 
-## bar chart of total abundance per site ----
+# bar chart of total abundance per sample site/pitfall trap
+
 ggplot(pitfall.dat, aes(x = pitfall, y = total_abundance)) +
   geom_bar(stat = "identity") +
-  labs(title = "Total Abundance of Ants per Site",
-       x = "Site",
-       y = "Total Abundance") +
+  labs(title = "Total abundance (count) of ants per pitfall trap",
+       x = "Pitfall trap",
+       y = "Total abundance (count)") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-## boxplot of total abundance between sites:
-ggplot(pitfall.dat, aes(x = site_type, y = total_abundance)) +
+# boxplot of total abundance between vegetation types:
+ggplot(pitfall.dat, aes(x = veg_type, y = total_abundance)) +
   geom_boxplot() +
-  labs(title = "Total Abundance of Ants between Sites",
-       x = "Site Type",
-       y = "Total Abundance") +
+  labs(title = "Total abundance of ants (count) between vegetation types",
+       x = "Vegetation type",
+       y = "Total Abundance (count)") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-## bar chart of species richness per site ---
+## Species richness plots: ----
+
+# bar chart of species richness per sample site/pitfall trap 
 ggplot(pitfall.dat, aes(x = pitfall, y = species_richness)) +
   geom_bar(stat = "identity") +
-  labs(title = "Species Richness per Site",
-       x = "Site",
+  labs(title = "Species richness per pitfall trap",
+       x = "Pitfall trap",
        y = "Species Richness") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-## boxplot of species richness between sites: ----
-ggplot(pitfall.dat, aes(x = site_type, y = species_richness)) +
+# boxplot of species richness between vegetation types
+ggplot(pitfall.dat, aes(x = veg_type, y = species_richness)) +
   geom_boxplot() +
-  labs(title = "Species Richness between Sites",
-       x = "Site Type",
+  labs(title = "Species richness between vegetation types",
+       x = "Vegetation type",
        y = "Species Richness") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
 
-## Statistical Analyses ----
+# Statistical Analyses ----
 
-# compare total abundance of ants between the two site types.
+## Compare total abundance of ants between the two vegetation types ----
 
-t.test(total_abundance ~ site_type, data = pitfall.dat)
+t.test(total_abundance ~ veg_type, data = pitfall.dat)
 
-# Welch Two Sample t-test
-# 
-# data:  total_abundance by site_type
-# t = 1.5525, df = 16.401, p-value = 0.1396
-# alternative hypothesis: true difference in means between group F and group G is not equal to 0
-# 95 percent confidence interval:
-#   -7.889391 51.389391
-# sample estimates:
-#   mean in group F mean in group G 
-# 38.5625         16.8125 
+# p-value = 0.1396 (>0.05). Thus, we fail to reject the null hypothesis that there is no difference in the total abundance of ants between the two vegetation types.
 
-# p-value = 0.1396 (>0.05). Thus, we fail to reject the null hypothesis that there is no difference in the total abundance of ants between the two site types.
 
-# determine if there's a relationship between site type and species richness.
+## Determine if there's a relationship between site type and species richness ----
 
-chisq.test(pitfall.dat$species_richness, pitfall.dat$site_type)
+chisq.test(pitfall.dat$species_richness, pitfall.dat$veg_type)
 
-# Pearson's Chi-squared test
-# 
-# data:  pitfall.dat$species_richness and pitfall.dat$site_type
-# X-squared = 7.1909, df = 6, p-value = 0.3036
+# p-value = 0.3036 (>0.05), thus, we fail to reject the null hypothesis that there is no relationship between the vegetation type and the species richness.
 
-# p-value = 0.3036 (>0.05), thus, we fail to reject the null hypothesis that there is no relationship between the site type and the species richness.
 
-# Assessing correlation between quadrat variables and species richness/total abundance ----
+## Assessing correlation between quadrat variables and species richness/total abundance ----
 
 # separate the 4 columns of quadrat data from quad.dat into a new data frame:
 quad_vars <- quad.dat %>%
@@ -165,7 +155,7 @@ quad_vars <- quad.dat %>%
 pitfall.quad.dat <- cbind(pitfall.dat, quad_vars)
  
 
-# run correlation tests between quadrat variables and species richness:
+# run correlation tests between quadrat variables and species richness: (could likely use a function but this is beyond my expertise)
 
 cor.test(pitfall.quad.dat$live.veg.pcover, pitfall.quad.dat$species_richness)
 

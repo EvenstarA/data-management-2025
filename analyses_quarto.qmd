@@ -1,5 +1,5 @@
 ---
-title: "analysis_quarto"
+title: "Step By Step Analysis"
 author: "Arwenn Kummer"
 format: html
 editor: visual
@@ -7,15 +7,15 @@ editor: visual
 
 ## Data Analysis - user friendly step-by-step version.
 
-The data set we will analyse involves the species names and counts of trapped ants, across two different sites - Fynbos and Eucalyptus/Gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the area where each pitfall trap was placed.
+The data set we're about to analyse involves the species names and counts of ants from pitfall traps, collected from two vegetation types: Fynbos and a stand of Eucalyptus/gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the sample site where each pitfall trap was placed.
 
 ## Pre-Analysis work
 
 We will use the packages *tidyverse* and *readxl* to load and analyse our data.
 
 ```{r}
-install.packages("tidyverse")
-install.packages("readxl")
+#| label: load-packages
+#| message: false
 
 library(tidyverse)
 library(readxl)
@@ -23,9 +23,10 @@ library(readxl)
 
 ## Data Wrangling, Cleaning and Checks
 
-We have data on soil surface features (quadrat data), species counts and species names. We will read in each data sheet, clean it and reorganize it for analysis.
+We have data on soil surface features (quadrat_data_clean), species counts and species names (pitfall_data_clean). We will read in each data sheet, clean it up a bit more and reorganize it for analysis.
 
 ```{r}
+
 quad.dat <- read.csv("quadrat_data_clean.csv")
 view(quad.dat)
 
@@ -34,14 +35,18 @@ view(pitfall.dat)
 
 ```
 
-**checking variables**: we want to confirm that variables are the correct format/type (i.e. *chr* for sites, and *int* for the counts).
+**Checking variables**: we want to confirm that variables are the correct format/type (i.e. *chr* for sites, and *int* for the counts).
 
 ```{r}
+#| label: check-var
+#| message: false
+
 str(quad.dat)
 str(pitfall.dat)
 ```
 
-**quad.dat column names** - the column names for the quadrat data are confusing. let's simplify them, but keep the fact that these values are a percentage of total coverag explicit (through .pcover)
+That all looks good, except for one thing...\
+**quad.dat column names** - the column names for the quadrat data are confusing with all those full-stops. Let's simplify the names, but keep the fact that these values are a percentage of total coverage explicit (using .pcover)
 
 ```{r}
 colnames(quad.dat) <- c("site", "live.veg.pcover", "leaf.litter.pcover", "bare.ground.pcover", "rocks.stones.pcover")
@@ -60,15 +65,15 @@ sum(duplicated(quad.dat))
 sum(duplicated(pitfall.dat))
 ```
 
-No missing values, and no duplicated values either! Yay! Now we can proceed with organizing and adding new variables prior to visualisation and analysis.
+No missing values, and no duplicated values either! Yay! Now we can proceed with organizing and manipulating our data frames prior to visualization and analysis.
 
 ## Organization:
 
-We want to see what the relationship is between site (i.e. fynbos and eucalyptus gums), total abundance, and species richness. We will use the ggplot2 package to create bar plots showing the total abundance of ants per site, as well as species richness per site.
+We want to see what the relationship is between vegetation type (i.e. fynbos or eucalyptus gums), total abundance, and species richness. We will use the *ggplot2* package to create bar plots and boxplots that show the total abundance and species richness of ants per pitfall/sample site, as well as between vegetation types. But before we do this, we need to calculate some values of total abundance and species richness for each trap. We have the raw counts for each trap, but don't have these two important values.
 
-#### Total abundance per site
+#### Total abundance per sample site/pitfall trap
 
-We want to generate the total abundance of ants per site; i.e. sum the observed species counts per row. Thus we need to sum across the columns of the data set. We will do this using the mutate function from the dplyr package:
+We want to generate the total abundance of ants per pitfall; i.e. we need to sum the observed species counts per row, by summing across the columns of the data set. We will do this using the **mutate** function from the *dplyr* package:
 
 ```{r}
 pitfall_total_abundance <- pitfall.dat %>%
@@ -77,134 +82,146 @@ pitfall_total_abundance <- pitfall.dat %>%
 
 ```
 
-#### Species richness per site
+#### Species richness per sample site/pitfall trap
 
-Similarly, we want to generate the species richness per site. For this we need to count how many columns have a value greater than 0 (i.e. the species was detected), and have each occurrence of \>0 logged as a count. Then we sum those counts for each row, to obtain the number of species found per site. Again, we'll use the mutate function:
+Similarly, we want to generate the species richness per pitfall. For this we need to count how many columns have a value greater than 0 (i.e. the species was detected), and have each occurrence of \>0 logged as a count. Then we sum those counts for each row, to obtain the number of species found per pitfall. Again, we'll use the **mutate** function:
 
 ```{r}
+#| message: false
+#| echo: false
 pitfall_species_richness <- pitfall.dat %>%
   group_by(pitfall) %>%
   mutate(species_richness = rowSums(across(everything()) > 0))
+
 ```
 
-Now we want to **combine** both the species richness and total abundance columns onto the original data set of pitfall trap data. We will do this using the left_join function from tidyverse.
+Now we want to combine both the species richness and total abundance columns onto the original data set of pitfall trap data. We will do this using the **left_join** function from *tidyverse*.
 
 ```{r}
+#| echo: false
+#| message: false
 pitfall.dat <- pitfall.dat %>%
   left_join(pitfall_total_abundance) %>%
   left_join(pitfall_species_richness)
+
 ```
 
-This sets us up with some great variables to use in our visualisation and analysis. But what about comparing differences between the two sites?
+This sets us up with some great variables to use in our visualization and analysis. But what about comparing differences [between]{.underline} the two vegetation types, eucalyptus and fynbos?
 
-#### Grouping samples from same site for broad scale pattern detection
+#### Grouping sites within the same vegetation types
 
-If we want to compare all samples from the eucalyptus/gum tree site with all the samples from the fynbos to detect any larger patterns, we need to create a new column with a factor for site, for each pitfall trap. We will do this (again using the mutate function), by assigning the factor level G for pitfall traps in the gum site or F for traps in the fynbos site to each row.
+If we want to detect any larger patterns by comparing all pitfalls from the eucalyptus stand with all the pitfalls from the Fynbos, we need to create a new column with a factor for vegetation type, and assign a level (G for eucalyptus/gums, F for Fynbos) for each pitfall trap. We will do this using the **mutate** and **str_detect** function to assign the factor levels to each row if the corresponding letter 'G' or 'F' are detected.
 
 ```{r}
 pitfall.dat <- pitfall.dat %>%
-  mutate(site_type = case_when (
+  mutate(veg_type = case_when (
     str_detect(pitfall, "G") ~ "G",
     str_detect(pitfall, "F") ~ "F"
   ))
+
 ```
 
 Now let's check that the new variable is a factor with two levels:
 
 ```{r}
-str(pitfall.dat) # the site_type comes up as a character variable. We want factors, since "site/habitat" has 2 levels. 
-
-pitfall.dat$site_type <- as.factor(pitfall.dat$site_type)
-
-str(pitfall.dat) 
+str(pitfall.dat) # veg_type comes up as a character variable. Let's change that.
+pitfall.dat$veg_type <- as.factor(pitfall.dat$veg_type)
 ```
 
-Now we're fully prepped to get into visualization and analysis:
+Now we're pretty much fully prepped to get into visualization and analysis!
 
-### Visualisation: 
+### Data visualization:
 
-First, we want to see if there is a visual difference in the data between the sample sites:
+First, we want to see if there are any general differences between the pitfall traps/sample sites themselves, and between the broader vegetation types.
 
-#### Total abundance per sample and site:
+#### Total abundance per sample and between vegetation types:
 
-Let's generate a bar-chart that will display the total abundance per sample, and a boxplot to compare total abundance between the two sites:
+Let's generate a bar-chart that will display the total abundance per pitfall trap, and a box-plot to compare total abundance between the two vegetation types:
 
 ```{r}
 ggplot(pitfall.dat, aes(x = pitfall, y = total_abundance)) +
   geom_bar(stat = "identity") +
-  labs(title = "Total Abundance of Ants per Site",
-       x = "Site",
-       y = "Total Abundance") +
+  labs(title = "Total abundance (count) of ants per pitfall trap",
+       x = "Pitfall trap",
+       y = "Total abundance (count)") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 ```{r}
-ggplot(pitfall.dat, aes(x = site_type, y = total_abundance)) +
+ggplot(pitfall.dat, aes(x = veg_type, y = total_abundance)) +
   geom_boxplot() +
-  labs(title = "Total Abundance of Ants between Sites",
-       x = "Site Type",
-       y = "Total Abundance") +
+  labs(title = "Total abundance of ants (count) between vegetation types",
+       x = "Vegetation type",
+       y = "Total Abundance (count)") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-#### Species richness per site:
+#### Species richness per sample and between vegetation types:
 
 We'll do the same for species richness:
 
 ```{r}
 ggplot(pitfall.dat, aes(x = pitfall, y = species_richness)) +
   geom_bar(stat = "identity") +
-  labs(title = "Species Richness per Site",
-       x = "Site",
+  labs(title = "Species richness per pitfall trap",
+       x = "Pitfall trap",
        y = "Species Richness") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
 ```{r}
-ggplot(pitfall.dat, aes(x = site_type, y = species_richness)) +
+ggplot(pitfall.dat, aes(x = veg_type, y = species_richness)) +
   geom_boxplot() +
-  labs(title = "Species Richness between Sites",
-       x = "Site Type",
+  labs(title = "Species richness between vegetation types",
+       x = "Vegetation type",
        y = "Species Richness") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
 Now that we have a visual idea of what the data are doing, let's run some formal statistical tests on the data to determine any relationships or correlations.
 
 ## Statistical analyses
 
-First, we will use the *t.test* function from base R to compare the total abundance of ants between the two site types.
+First, we will use the **t.test** function from base R to compare the total abundance of ants between the two vegetation types.
 
 ```{r}
-t.test(total_abundance ~ site_type, data = pitfall.dat)
+t.test(total_abundance ~ veg_type, data = pitfall.dat)
 
 ```
 
-Here, the p-value is 0.1396, which is greater than the significance level of 0.05. Thus, we fail to reject the null hypothesis that there is no difference in the total abundance of ants between the two site types. In plain words, there is no statistical support for a significant difference in total abundance between the two sites.
+Here, the p-value is 0.1396, which is greater than the significance level of 0.05. Thus, we fail to reject the null hypothesis that there is no difference in the total abundance of ants between the two site types.
 
-Another test we can run is a *chi-squared test of independence* to see if there is a relationship between the site type and the species richness. We will use the chisq.test function from base R for this.
+In plain words, there is no statistically significant support for a difference in total abundance between the two vegetation types.
+
+Another test we can run is a *chi-squared test of independence* to see if there is a relationship between the vegetation type and species richness. We will use the **chisq.test** function from base R for this.
 
 ```{r}
-chisq.test(pitfall.dat$species_richness, pitfall.dat$site_type)
+chisq.test(pitfall.dat$species_richness, pitfall.dat$veg_type)
 ```
 
-Here, the p-value is 0.3036 which is greater than 0.05 than the significance level of 0.05. Thus, we fail to reject the null hypothesis that there is no relationship between the site type and the species richness. Once again, in plain words, there is no statistical support for there being a significant difference in species richness between the two sites.
+Here, the p-value is 0.3036 which is greater than the significance level of 0.05. Thus, we fail to reject the null hypothesis that there is no relationship between the site type and the species richness.
 
-Since these two tests couldn't help us determine a distinct difference, let's dive deeper. Remember the quadrat data we collected? Let's see if differences in these variables lead to any significant variations in species richness or abundance.
+Once again, in plain words, there is no statistically significant support for any difference in species richness between the two vegetation types.
+
+Since these two tests led to a dead end in determining if there's a difference between the broader vegetation types, let's dive deeper. Remember the quadrat data we collected? Let's see if differences in these variables lead to any significant variations in species richness or abundance between the pitfall traps and their immediate environments.
 
 ### Quadrat data, species richness, and total abundance
 
-We will use the *cor.test* function from base R to calculate the correlation coefficient between the total abundance and the quadrat variables.
+We will use the **cor.test** function from base R to calculate the correlation coefficient between the total abundance and the quadrat variables.
 
 ***However, at this point the pitfall and quadrat data are in two separate data frames.***
 
-We will merge the quadrat data into the pitfall trap data to allow us to more easily analyse the data. However, we only need select columns from the quadrat data, as the pitfall trap tags (i.e. G.2.4) are common to both data frames. We also already have the site types in our pitfall trap data frame.
+We will merge the quadrat data into the pitfall trap data to allow us to more easily run an analysis. However, we only need certain columns from the quadrat data, as the pitfall trap tags (i.e. G.2.4) are common to both data frames. We also already have the site types (G or F) in our pitfall trap data frame.
 
-In reality, we only need columns 2 to 5 from the quadrat data frame; so we'll only tack those onto the main pitfall data frame. To do this, we'll extract the columns we want into a new variable, then bind them to the pitfall data. ***This only works well because we haven't jumbled the order of either data set, so if we copy the columns directly across, they will correspond to the correct sites/pitfall traps.***
+In reality, we only need columns 2 to 5 from the quad.dat data frame. To tack these onto the rest of our main data (stored in pitfall.dat), we'll extract the columns we want into a new variable, then bind them to the pitfall data.
+
+***NB: This only works well because we haven't jumbled the order or arrangement of either individual data set. Thus if we copy the columns directly across, they will correspond to the correct sites/pitfall traps.***
 
 ```{r}
 # separate the 4 columns of quadrat data from quad.dat into a new data frame:
@@ -215,7 +232,13 @@ quad_vars <- quad.dat %>%
 pitfall.quad.dat <- cbind(pitfall.dat, quad_vars)
 ```
 
-Now we'll run correlation tests on quadrat variables and species richness:
+Note that I've distinguished that our new data set has [both]{.underline} the pitfall and quadrat data, by naming the variable pitfall.quad.dat.
+
+### Correlation tests: 
+
+#### Species richness and quadrat data:
+
+Now we can run correlation tests on the quadrat variables and species richness:
 
 ```{r}
 
@@ -229,9 +252,9 @@ cor.test(pitfall.quad.dat$rocks.stones.pcover, pitfall.quad.dat$species_richness
 
 ```
 
-From this we can see that the relationship between live vegetation cover, bare ground cover and species richness is positive, but not statistically significant. The relationship between leaf litter and rocks/stones is negative but not statistically significant.
+From this we can see that the relationship between live vegetation cover & species richness, and bare ground cover & species richness are positive, but not statistically significant. The relationship between leaf litter \$ species richness, and rocks/stones & species richness is negative, but also not statistically significant.
 
-For total abundance:
+#### Total abundance and quadrat data:
 
 ```{r}
 cor.test(pitfall.quad.dat$live.veg.pcover, pitfall.quad.dat$total_abundance)
@@ -241,8 +264,9 @@ cor.test(pitfall.quad.dat$leaf.litter.pcover, pitfall.quad.dat$total_abundance)
 cor.test(pitfall.quad.dat$bare.ground.pcover, pitfall.quad.dat$total_abundance)
  
 cor.test(pitfall.quad.dat$rocks.stones.pcover, pitfall.quad.dat$total_abundance)
+
 ```
 
-Here, we can see some interesting results!! The correlation between live vegetation and total abundance is positive and statistically significant! Also, leaf litter and total abundance is negatively correlated and statistically significant. However, both bare ground and rocks/stones aren't statistically significant and are negatively and positively correlated, respectively.
+Here, we finally get some interesting results!! The correlation between live vegetation & total abundance is positive and statistically significant! Also, leaf litter &total abundance is negatively correlated and statistically significant. Both bare ground & total abundance, and rocks/stones & total abundance aren't statistically significant and are negatively and positively correlated, respectively. Just remember that correlation does not imply causation!
 
-But, keep in mind that correlation does not imply causation!
+This brings us to the end of our sample analyses! Thanks for reading, and happy analyses!
