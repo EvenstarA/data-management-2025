@@ -93,5 +93,4 @@ ggplot(pitfall.dat, aes(x = pitfall, y = species_richness)) +
        y = "Species Richness") +
   theme_classic()
 
-
 # Suggested Statistics
