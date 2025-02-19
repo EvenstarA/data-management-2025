@@ -1,0 +1,60 @@
+---
+title: "analysis_quarto"
+author: "Arwenn Kummer"
+format: html
+editor: visual
+---
+
+## Data Analysis - user friendly
+
+The data set we will analyse involves the species names and counts of trapped ants, across two different sites - Fynbos and Eucalyptus/Gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the area where each pitfall trap was placed.
+
+## Pre-Analysis work
+
+We will use the packages *tidyverse* and *readxl* to load and analyse our data.
+
+```{r}
+install.packages("tidyverse")
+install.packages("readxl")
+
+library(tidyverse)
+library(readxl)
+```
+
+## Data Wrangling, Cleaning and Checks
+
+We have data on soil surface features (quadrat data), species counts and species names. We will read in each data sheet, clean it and reorganize it for analysis.
+
+```{r}
+quad.dat <- read.csv("quadrat_data_clean.csv")
+view(quad.dat)
+
+pitfall.dat <- read.csv("pitfall_data_clean.csv")
+view(pitfall.dat)
+
+```
+
+Exploring the data structure - we want to confirm that variables are the correct format/type (i.e. *chr* for sites, and *int* for the counts).
+
+```{r}
+str(quad.dat)
+str(pitfall.dat)
+```
+
+Next we will confirm that there are no "empty" observations (i.e. missing values), and no duplicates.
+
+```{r}
+## check for missing values ----
+sum(is.na(quad.dat))
+sum(is.na(pitfall.dat))
+
+## check for duplicates ----
+sum(duplicated(quad.dat))
+sum(duplicated(pitfall.dat))
+```
+
+No missing values, and no duplicated values either! Yay! Now we can proceed with Analysis
+
+## Analysis
+
+\
