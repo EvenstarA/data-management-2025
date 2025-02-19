@@ -45,7 +45,7 @@ sum(is.na(pitfall.dat))
 sum(duplicated(quad.dat))
 sum(duplicated(pitfall.dat))
 
-# Suggested analyses - Branch Point 1: ----
+# Suggested visualisations - Branch Point 1: ----
 # We want to see what the relationship is between site (i.e. fynbos and eucalyptus gums), total abundance, and species richness.
 # We will use the ggplot2 package to create a bar plot of the total abundance of ants per site, and a scatter plot of species richness per site. 
 
@@ -94,3 +94,4 @@ ggplot(pitfall.dat, aes(x = pitfall, y = species_richness)) +
   theme_classic()
 
 
+# Suggested Statistics
