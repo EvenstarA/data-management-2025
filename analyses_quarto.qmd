@@ -5,7 +5,7 @@ format: html
 editor: visual
 ---
 
-## Data Analysis - user friendly
+## Data Analysis - user friendly step-by-step version.
 
 The data set we will analyse involves the species names and counts of trapped ants, across two different sites - Fynbos and Eucalyptus/Gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the area where each pitfall trap was placed.
 
@@ -34,11 +34,18 @@ view(pitfall.dat)
 
 ```
 
-Exploring the data structure - we want to confirm that variables are the correct format/type (i.e. *chr* for sites, and *int* for the counts).
+**checking variables**: we want to confirm that variables are the correct format/type (i.e. *chr* for sites, and *int* for the counts).
 
 ```{r}
 str(quad.dat)
 str(pitfall.dat)
+```
+
+**quad.dat column names** - the column names for the quadrat data are confusing. let's simplify them, but keep the fact that these values are a percentage of total coverag explicit (through .pcover)
+
+```{r}
+colnames(quad.dat) <- c("site", "live.veg.pcover", "leaf.litter.pcover", "bare.ground.pcover", "rocks.stones.pcover")
+
 ```
 
 Next we will confirm that there are no "empty" observations (i.e. missing values), and no duplicates.
@@ -53,8 +60,153 @@ sum(duplicated(quad.dat))
 sum(duplicated(pitfall.dat))
 ```
 
-No missing values, and no duplicated values either! Yay! Now we can proceed with Analysis
+No missing values, and no duplicated values either! Yay! Now we can proceed with organizing and adding new variables prior to visualisation and analysis.
 
-## Analysis
+## Organization:
 
-\
+We want to see what the relationship is between site (i.e. fynbos and eucalyptus gums), total abundance, and species richness. We will use the ggplot2 package to create bar plots showing the total abundance of ants per site, as well as species richness per site.
+
+#### Total abundance per site
+
+We want to generate the total abundance of ants per site; i.e. sum the observed species counts per row. Thus we need to sum across the columns of the data set. We will do this using the mutate function from the dplyr package:
+
+```{r}
+pitfall_total_abundance <- pitfall.dat %>%
+  group_by(pitfall) %>%
+  mutate(total_abundance = rowSums(across(everything())))
+
+```
+
+#### Species richness per site
+
+Similarly, we want to generate the species richness per site. For this we need to count how many columns have a value greater than 0 (i.e. the species was detected), and have each occurrence of \>0 logged as a count. Then we sum those counts for each row, to obtain the number of species found per site. Again, we'll use the mutate function:
+
+```{r}
+pitfall_species_richness <- pitfall.dat %>%
+  group_by(pitfall) %>%
+  mutate(species_richness = rowSums(across(everything()) > 0))
+```
+
+Now we want to **combine** both the species richness and total abundance columns onto the original data set of pitfall trap data. We will do this using the left_join function from tidyverse.
+
+```{r}
+pitfall.dat <- pitfall.dat %>%
+  left_join(pitfall_total_abundance) %>%
+  left_join(pitfall_species_richness)
+```
+
+This sets us up with some great variables to use in our visualisation and analysis. But what about comparing differences between the two sites?
+
+#### Grouping samples from same site for broad scale pattern detection
+
+If we want to compare all samples from the eucalyptus/gum tree site with all the samples from the fynbos to detect any larger patterns, we need to create a new column with a factor for site, for each pitfall trap. We will do this (again using the mutate function), by assigning the factor level G for pitfall traps in the gum site or F for traps in the fynbos site to each row.
+
+```{r}
+pitfall.dat <- pitfall.dat %>%
+  mutate(site_type = case_when (
+    str_detect(pitfall, "G") ~ "G",
+    str_detect(pitfall, "F") ~ "F"
+  ))
+```
+
+Now let's check that the new variable is a factor with two levels:
+
+```{r}
+str(pitfall.dat) # the site_type comes up as a character variable. We want factors, since "site/habitat" has 2 levels. 
+
+pitfall.dat$site_type <- as.factor(pitfall.dat$site_type)
+
+str(pitfall.dat) 
+```
+
+Now we're fully prepped to get into visualization and analysis:
+
+### Visualisation: 
+
+First, we want to see if there is a visual difference in the data between the sample sites:
+
+#### Total abundance per sample and site:
+
+Let's generate a bar-chart that will display the total abundance per sample, and a boxplot to compare total abundance between the two sites:
+
+```{r}
+ggplot(pitfall.dat, aes(x = pitfall, y = total_abundance)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Total Abundance of Ants per Site",
+       x = "Site",
+       y = "Total Abundance") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+ggplot(pitfall.dat, aes(x = site_type, y = total_abundance)) +
+  geom_boxplot() +
+  labs(title = "Total Abundance of Ants between Sites",
+       x = "Site Type",
+       y = "Total Abundance") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+#### Species richness per site:
+
+We'll do the same for species richness:
+
+```{r}
+ggplot(pitfall.dat, aes(x = pitfall, y = species_richness)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Species Richness per Site",
+       x = "Site",
+       y = "Species Richness") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+ggplot(pitfall.dat, aes(x = site_type, y = species_richness)) +
+  geom_boxplot() +
+  labs(title = "Species Richness between Sites",
+       x = "Site Type",
+       y = "Species Richness") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Now that we have a visual idea of what the data are doing, let's run some formal statistical tests on the data to determine any relationships or correlations.
+
+## Statistical analyses
+
+First, we will use the *t.test* function from base R to compare the total abundance of ants between the two site types.
+
+```{r}
+t.test(total_abundance ~ site_type, data = pitfall.dat)
+
+```
+
+Here, the p-value is 0.1396, which is greater than the significance level of 0.05. Thus, we fail to reject the null hypothesis that there is no difference in the total abundance of ants between the two site types. In plain words, there is no statistical support for a significant difference in total abundance between the two sites.
+
+Another test we can run is a *chi-squared test of independence* to see if there is a relationship between the site type and the species richness. We will use the chisq.test function from base R for this.
+
+```{r}
+chisq.test(pitfall.dat$species_richness, pitfall.dat$site_type)
+```
+
+Here, the p-value is 0.3036 which is greater than 0.05 than the significance level of 0.05. Thus, we fail to reject the null hypothesis that there is no relationship between the site type and the species richness. Once again, in plain words, there is no statistical support for there being a significant difference in species richness between the two sites.
+
+Since these two tests couldn't help us determine a distinct difference, let's dive deeper. Remember the quadrat data we collected? Let's see if differences in these variables lead to any significant variations in species richness or abundance.
+
+### Quadrat data, species richness, and total abundance
+
+We will use the *cor.test* function from base R to calculate the correlation coefficient between the total abundance and the quadrat variables.
+
+***However, at this point the pitfall and quadrat data are in two separate data frames.***
+
+We will merge the quadrat data into the pitfall trap data to allow us to more easily analyse the data. However, we only need select columns from the quadrat data, as the pitfall trap tags (i.e. G.2.4) are common to both data frames. We also already have the site types in our pitfall trap data frame.
+
+In reality, we only need columns 2 to 5 from the quadrat data frame; so we'll only tack those onto the main pitfall data frame, and rename it to pitfall.quad.dat so that we know what is in that data frame. We'll use the *cross_join* function to do this.
+
+```{r}
+pitfall.quad.dat <- pitfall.dat %>%
+  cross_join(quad.dat[,2:5])
+```
