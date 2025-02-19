@@ -34,6 +34,9 @@ view(pitfall.dat)
 str(quad.dat)
 str(pitfall.dat)
 
+# the column names for the quadrat data are confusing. let's simplify them, but keep the fact that these values are a percentage of total coverag explicit (through .pcover) 
+colnames(quad.dat) <- c("site", "live.veg.pcover", "leaf.litter.pcover", "bare.ground.pcover", "rocks.stones.pcover")
+
 ## check for missing values ----
 sum(is.na(quad.dat))
 sum(is.na(pitfall.dat))
@@ -42,7 +45,7 @@ sum(is.na(pitfall.dat))
 sum(duplicated(quad.dat))
 sum(duplicated(pitfall.dat))
 
-# Branch Point 1: suggested analyses: ----
+# Suggested analyses - Branch Point 1: ----
 # We want to see what the relationship is between site (i.e. fynbos and eucalyptus gums), total abundance, and species richness.
 # We will use the ggplot2 package to create a bar plot of the total abundance of ants per site, and a scatter plot of species richness per site. 
 
@@ -62,7 +65,32 @@ pitfall_species_richness <- pitfall.dat %>%
   group_by(pitfall) %>%
   mutate(species_richness = rowSums(across(everything()) > 0))
 
-# Now we will create the plots
+# now we want to combine both the species richness and total abundance columns onto the original data set of pitfall trap data. We will do this using the left_join function from tidyverse.
+pitfall.dat <- pitfall.dat %>%
+  left_join(pitfall_total_abundance) %>%
+  left_join(pitfall_species_richness)
 
+
+# Data Visualisation: ----
+# Now we are all set to create the plots. We will use the ggplot2 package from tidyverse as well for this.
+
+
+# Box plot of total abundance per site ----
+ggplot(pitfall.dat, aes(x = pitfall, y = total_abundance)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Total Abundance of Ants per Site",
+       x = "Site",
+       y = "Total Abundance") +
+  theme_classic()
+# change the code above to make the bar colours the same
+
+
+# box plot of species richness per site ---
+ggplot(pitfall.dat, aes(x = pitfall, y = species_richness)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Species Richness per Site",
+       x = "Site",
+       y = "Species Richness") +
+  theme_classic()
 
 
