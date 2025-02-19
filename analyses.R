@@ -42,5 +42,5 @@ sum(is.na(pitfall.dat))
 sum(duplicated(quad.dat))
 sum(duplicated(pitfall.dat))
 
-# Analysis: ----
+
 
