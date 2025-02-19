@@ -9,8 +9,7 @@
 # Preamble:
 # The data set we will analyse involves analyzing the species and counts of pitfall trapped ants, across two different vegetation types - Fynbos and Eucalyptus/Gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the sample site where each pitfall trap was placed. 
 
-
-# Pre-analysis ----
+# # Pre-analysis ----
 
 ## install packages ----
 install.packages("tidyverse")
@@ -175,4 +174,39 @@ cor.test(pitfall.quad.dat$leaf.litter.pcover, pitfall.quad.dat$total_abundance)
 cor.test(pitfall.quad.dat$bare.ground.pcover, pitfall.quad.dat$total_abundance)
  
 cor.test(pitfall.quad.dat$rocks.stones.pcover, pitfall.quad.dat$total_abundance)
+
+
+# End ----
+
+# Session info: -----
+# R version 4.4.2 (2024-10-31 ucrt)
+# Platform: x86_64-w64-mingw32/x64
+# Running under: Windows 11 x64 (build 26100)
+# 
+# Matrix products: default
+# 
+# 
+# locale:
+#   [1] LC_COLLATE=English_South Africa.utf8  LC_CTYPE=English_South Africa.utf8    LC_MONETARY=English_South Africa.utf8
+# [4] LC_NUMERIC=C                          LC_TIME=English_South Africa.utf8    
+# 
+# time zone: Africa/Johannesburg
+# tzcode source: internal
+# 
+# attached base packages:
+#   [1] stats     graphics  grDevices utils     datasets  methods   base     
+# 
+# other attached packages:
+#   [1] readxl_1.4.3    lubridate_1.9.4 forcats_1.0.0   stringr_1.5.1   dplyr_1.1.4     purrr_1.0.2     readr_2.1.5     tidyr_1.3.1    
+# [9] tibble_3.2.1    ggplot2_3.5.1   tidyverse_2.0.0
+# 
+# loaded via a namespace (and not attached):
+#   [1] gtable_0.3.6      compiler_4.4.2    tidyselect_1.2.1  scales_1.3.0      R6_2.5.1          labeling_0.4.3    generics_0.1.3   
+# [8] knitr_1.49        munsell_0.5.1     pillar_1.9.0      tzdb_0.4.0        rlang_1.1.4       utf8_1.2.4        stringi_1.8.4    
+# [15] xfun_0.49         timechange_0.3.0  cli_3.6.3         withr_3.0.2       magrittr_2.0.3    grid_4.4.2        rstudioapi_0.17.1
+# [22] hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5       evaluate_1.0.1    glue_1.8.0        farver_2.1.2      cellranger_1.1.0 
+# [29] fansi_1.0.6       colorspace_2.1-1  tools_4.4.2       pkgconfig_2.0.3  
+
+
+
 
