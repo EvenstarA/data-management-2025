@@ -42,5 +42,7 @@ sum(is.na(pitfall.dat))
 sum(duplicated(quad.dat))
 sum(duplicated(pitfall.dat))
 
+# Suggested Analyses:
+# We want to see what the relationship is between site (i.e. fynbos and eucalyptus gums), total abundance, and species richness.
 
 
