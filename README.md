@@ -15,6 +15,7 @@ To replicate the analyses, you will need to download the following:
 - pitfall_data_clean.csv
 - quadrat_data_clean.csv
 - analyses_quarto.qmd
+
 It may be beneficial to read the session info for software details.
 
 Meta data, the raw data file, and the output figures can be found in the data/raw folder, and images folder on GitHub.
