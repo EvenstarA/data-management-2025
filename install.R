@@ -1,3 +1,3 @@
 install.packages("tidyverse")
 install.packages("readxl")
-install.packages("quarto")
+install.packages("rmarkdown")
