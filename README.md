@@ -12,13 +12,11 @@ The data includes ant genus and species names, species counts, and percentage co
 
 In addition to the RScript, a more thorough, step-by-step guide to my thought process is documented in a more user-friendly manner, in the analyses_quarto.qmd file. This includes written paragraphs and chunks of code, details of packages used and the justification behind my analysis and coding process. If there are issues with running the main RScript (but hopefully there aren't), the Quarto document may hold a clearer explanation which may assist in troubleshooting. 
 
-To replicate the analyses, you will need to download the following files from this repository: 
-- Data Management Course 2025.Rproj
+To replicate the analyses, you will need to download the following files from this repository to your computer. It may be beneficial to read the session info for software details. 
 - analyses.R
 - pitfall_data_clean.csv
 - quadrat_data_clean.csv
 - analyses_quarto.qmd
-
-It may be beneficial to read the session info for software details.
+Alternatively you can follow this link to run the session online through MyBinder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/EvenstarA/data-management-2025/HEAD)
 
 Happy analyses!
