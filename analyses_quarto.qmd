@@ -7,7 +7,7 @@ editor: visual
 
 ## Data Analysis - user friendly step-by-step version.
 
-The data set we're about to analyse involves the species names and counts of ants from pitfall traps, collected from two vegetation types: Fynbos and a stand of Eucalyptus/gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the sample site where each pitfall trap was placed.
+The data set we're about to analyse involves the species names and counts of ants from pitfall traps, collected from two vegetation types: Fynbos, and a stand of Eucalyptus/gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the sample site where each pitfall trap was placed.
 
 ## Pre-Analysis work
 
@@ -234,7 +234,7 @@ pitfall.quad.dat <- cbind(pitfall.dat, quad_vars)
 
 Note that I've distinguished that our new data set has [both]{.underline} the pitfall and quadrat data, by naming the variable pitfall.quad.dat.
 
-### Correlation tests: 
+### Correlation tests:
 
 #### Species richness and quadrat data:
 
