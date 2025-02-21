@@ -105,11 +105,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="data-analysis---user-friendly-step-by-step-version." class="level2">
 <h2 class="anchored" data-anchor-id="data-analysis---user-friendly-step-by-step-version.">Data Analysis - user friendly step-by-step version.</h2>
-<p>The data set we’re about to analyse involves the species names and counts of ants from pitfall traps, collected from two vegetation types: Fynbos and a stand of Eucalyptus/gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the sample site where each pitfall trap was placed.</p>
+<p>The data set we’re about to analyse includes information on species names and counts of ants from pitfall traps, collected from two vegetation types: Fynbos (F), and a stand of Eucalyptus/gum trees (G). The data set contains individual species counts, species names and quantitative soil surface data, collected using a quadrat placed over the sample site where each pitfall trap was placed. We aim to investigate the relationships between vegetation types, surface soil features and species richness and total abundances.</p>
 </section>
 <section id="pre-analysis-work" class="level2">
 <h2 class="anchored" data-anchor-id="pre-analysis-work">Pre-Analysis work</h2>
-<p>We will use the packages <em>tidyverse</em> and <em>readxl</em> to load and analyse our data.</p>
+<p>We will use the packages <em>tidyverse</em> and <em>readxl</em> to load and analyse our data in RStudio.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -125,7 +125,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>pitfall.dat <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"pitfall_data_clean.csv"</span>)</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(pitfall.dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p><strong>Checking variables</strong>: we want to confirm that variables are the correct format/type (i.e.&nbsp;<em>chr</em> for sites, and <em>int</em> for the counts).</p>
+<p><strong>1) Checking variables</strong>: we want to confirm that variables are the correct format/type (i.e.&nbsp;<em>chr</em> for sites, and <em>int</em> for the counts).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(quad.dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -156,8 +156,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  $ unknown.sp      : int  0 0 0 0 0 0 0 0 0 0 ...</code></pre>
 </div>
 </div>
-<p>That all looks good, except for one thing…<br>
-<strong>quad.dat column names</strong> - the column names for the quadrat data are confusing with all those full-stops. Let’s simplify the names, but keep the fact that these values are a percentage of total coverage explicit (using .pcover)</p>
+<p>That all looks good, except for one thing…</p>
+<p><strong>2) quad.dat column names</strong> - the column names for the quadrat data are confusing with all those full-stops. Let’s simplify the names, but keep the fact that these values are a percentage of total coverage explicit (using .pcover)</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(quad.dat) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"live.veg.pcover"</span>, <span class="st">"leaf.litter.pcover"</span>, <span class="st">"bare.ground.pcover"</span>, <span class="st">"rocks.stones.pcover"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -186,10 +186,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="organization" class="level2">
 <h2 class="anchored" data-anchor-id="organization">Organization:</h2>
-<p>We want to see what the relationship is between vegetation type (i.e.&nbsp;fynbos or eucalyptus gums), total abundance, and species richness. We will use the <em>ggplot2</em> package to create bar plots and boxplots that show the total abundance and species richness of ants per pitfall/sample site, as well as between vegetation types. But before we do this, we need to calculate some values of total abundance and species richness for each trap. We have the raw counts for each trap, but don’t have these two important values.</p>
+<p>We want to see what the relationship is between vegetation type (i.e.&nbsp;fynbos or eucalyptus gums), total abundance, and species richness. We will use the <em>ggplot2</em> package to create bar plots and boxplots that show the total abundance and species richness of ants per pitfall/sample site, as well as between vegetation types. But before we do this, we need to generate the values for total abundance and species richness for each pitfall trap. We have the raw counts for each trap, but don’t have these two important values yet.</p>
 <section id="total-abundance-per-sample-sitepitfall-trap" class="level4">
 <h4 class="anchored" data-anchor-id="total-abundance-per-sample-sitepitfall-trap">Total abundance per sample site/pitfall trap</h4>
-<p>We want to generate the total abundance of ants per pitfall; i.e.&nbsp;we need to sum the observed species counts per row, by summing across the columns of the data set. We will do this using the <strong>mutate</strong> function from the <em>dplyr</em> package:</p>
+<p>We want to generate the total abundance of ants per pitfall trap; i.e.&nbsp;we need to sum the observed species counts in each row. We’ll do this by summing the counts of each species identified in each pitfall trap and adding a new column to the dataset that stores this information (total_abundance). To do this, we’ll use the <strong>mutate</strong> function from the <em>dplyr</em> package:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pitfall_total_abundance <span class="ot">&lt;-</span> pitfall.dat <span class="sc">%&gt;%</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(pitfall) <span class="sc">%&gt;%</span></span>
@@ -198,13 +198,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="species-richness-per-sample-sitepitfall-trap" class="level4">
 <h4 class="anchored" data-anchor-id="species-richness-per-sample-sitepitfall-trap">Species richness per sample site/pitfall trap</h4>
-<p>Similarly, we want to generate the species richness per pitfall. For this we need to count how many columns have a value greater than 0 (i.e.&nbsp;the species was detected), and have each occurrence of &gt;0 logged as a count. Then we sum those counts for each row, to obtain the number of species found per pitfall. Again, we’ll use the <strong>mutate</strong> function:</p>
-<p>Now we want to combine both the species richness and total abundance columns onto the original data set of pitfall trap data. We will do this using the <strong>left_join</strong> function from <em>tidyverse</em>.</p>
-<p>This sets us up with some great variables to use in our visualization and analysis. But what about comparing differences <u>between</u> the two vegetation types, eucalyptus and fynbos?</p>
+<p>Similarly, we want to generate the species richness per pitfall trap. For this we need R to count how many columns have a value greater than 0 (i.e.&nbsp;the species was detected), and have each occurrence of &gt;0 logged as a count. Then we sum those counts for each row, to obtain the number of species found per pitfall. We’ll store this information in a new column, species_richness. Again, we’ll use the <strong>mutate</strong> function:</p>
+<p>It’s a good idea to do a visual check of the data frame here, to make sure that the values of total abundance and species richness make sense for the information provided in the rows and columns. For example, something has clearly gone wrong if you can only count 3 species detected for a given pitfall trap, but the species_richness column says “7”. Fortunately for us, our visual check shows that the values in the new columns are all correct.</p>
+<p>Now we want to combine both the species_richness and total_abundance columns onto the original data set of pitfall trap data. We will do this using the <strong>left_join</strong> function from <em>tidyverse</em>.</p>
+<p>This has set us up with sensible variables to use for visualization and analysis. But what about comparing differences <u>between</u> the two vegetation types, eucalyptus and fynbos?</p>
 </section>
 <section id="grouping-sites-within-the-same-vegetation-types" class="level4">
 <h4 class="anchored" data-anchor-id="grouping-sites-within-the-same-vegetation-types">Grouping sites within the same vegetation types</h4>
-<p>If we want to detect any larger patterns by comparing all pitfalls from the eucalyptus stand with all the pitfalls from the Fynbos, we need to create a new column with a factor for vegetation type, and assign a level (G for eucalyptus/gums, F for Fynbos) for each pitfall trap. We will do this using the <strong>mutate</strong> and <strong>str_detect</strong> function to assign the factor levels to each row if the corresponding letter ‘G’ or ‘F’ are detected.</p>
+<p>If we want to detect any larger patterns by comparing all the pitfall traps from the eucalyptus stand with all the pitfalls from the Fynbos, we need to create a new column with a factor for vegetation type, and assign a level (G for eucalyptus/gums, F for Fynbos) to each pitfall trap/row. We will do this using the <strong>mutate</strong> and <strong>str_detect</strong> function to assign the appropriate factor level to each row, if the corresponding letter ‘G’ or ‘F’ are detected in the ‘pitfall’ variable column.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>pitfall.dat <span class="ot">&lt;-</span> pitfall.dat <span class="sc">%&gt;%</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">veg_type =</span> <span class="fu">case_when</span> (</span>
@@ -212,7 +213,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_detect</span>(pitfall, <span class="st">"F"</span>) <span class="sc">~</span> <span class="st">"F"</span></span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now let’s check that the new variable is a factor with two levels:</p>
+<p>Now let’s check that the new variable is a factor with two levels. If not, we’ll reassign the variable to be a factor, using the <strong>as.factor()</strong> function.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(pitfall.dat) <span class="co"># veg_type comes up as a character variable. Let's change that.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -320,7 +321,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="statistical-analyses" class="level2">
 <h2 class="anchored" data-anchor-id="statistical-analyses">Statistical analyses</h2>
-<p>First, we will use the <strong>t.test</strong> function from base R to compare the total abundance of ants between the two vegetation types.</p>
+<p>First, we will use the <strong>t.test()</strong> function from base R to compare the total abundance of ants between the two vegetation types.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(total_abundance <span class="sc">~</span> veg_type, <span class="at">data =</span> pitfall.dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -339,7 +340,7 @@ mean in group F mean in group G
 </div>
 <p>Here, the p-value is 0.1396, which is greater than the significance level of 0.05. Thus, we fail to reject the null hypothesis that there is no difference in the total abundance of ants between the two site types.</p>
 <p>In plain words, there is no statistically significant support for a difference in total abundance between the two vegetation types.</p>
-<p>Another test we can run is a <em>chi-squared test of independence</em> to see if there is a relationship between the vegetation type and species richness. We will use the <strong>chisq.test</strong> function from base R for this.</p>
+<p>Another test we can run is a <em>chi-squared test of independence</em> to see if there is a relationship between the vegetation type and species richness. We will use the <strong>chisq.test()</strong> function from base R for this.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chisq.test</span>(pitfall.dat<span class="sc">$</span>species_richness, pitfall.dat<span class="sc">$</span>veg_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -359,9 +360,9 @@ X-squared = 7.1909, df = 6, p-value = 0.3036</code></pre>
 <p>Since these two tests led to a dead end in determining if there’s a difference between the broader vegetation types, let’s dive deeper. Remember the quadrat data we collected? Let’s see if differences in these variables lead to any significant variations in species richness or abundance between the pitfall traps and their immediate environments.</p>
 <section id="quadrat-data-species-richness-and-total-abundance" class="level3">
 <h3 class="anchored" data-anchor-id="quadrat-data-species-richness-and-total-abundance">Quadrat data, species richness, and total abundance</h3>
-<p>We will use the <strong>cor.test</strong> function from base R to calculate the correlation coefficient between the total abundance and the quadrat variables.</p>
+<p>We will use the <strong>cor.test()</strong> function from base R to calculate the correlation coefficient between the total abundance and the quadrat variables.</p>
 <p><strong><em>However, at this point the pitfall and quadrat data are in two separate data frames.</em></strong></p>
-<p>We will merge the quadrat data into the pitfall trap data to allow us to more easily run an analysis. However, we only need certain columns from the quadrat data, as the pitfall trap tags (i.e.&nbsp;G.2.4) are common to both data frames. We also already have the site types (G or F) in our pitfall trap data frame.</p>
+<p>We will merge the quadrat data into the pitfall trap data to allow us to more easily run an analysis. However, we only need certain columns from the quadrat data, as the pitfall trap and site information (i.e.&nbsp;G.2.4) is the same in both data frames. We also already have the site types (G or F) in our pitfall trap data frame.</p>
 <p>In reality, we only need columns 2 to 5 from the quad.dat data frame. To tack these onto the rest of our main data (stored in pitfall.dat), we’ll extract the columns we want into a new variable, then bind them to the pitfall data.</p>
 <p><strong><em>NB: This only works well because we haven’t jumbled the order or arrangement of either individual data set. Thus if we copy the columns directly across, they will correspond to the correct sites/pitfall traps.</em></strong></p>
 <div class="cell">
@@ -437,7 +438,7 @@ sample estimates:
 -0.08611672 </code></pre>
 </div>
 </div>
-<p>From this we can see that the relationship between live vegetation cover &amp; species richness, and bare ground cover &amp; species richness are positive, but not statistically significant. The relationship between leaf litter $ species richness, and rocks/stones &amp; species richness is negative, but also not statistically significant.</p>
+<p>From this we can see that the relationship between live vegetation cover &amp; species richness, and bare ground cover &amp; species richness are positive, but not statistically significant. The relationship between leaf litter &amp; species richness, and rocks/stones &amp; species richness is negative, but also not statistically significant.</p>
 </section>
 <section id="total-abundance-and-quadrat-data" class="level4">
 <h4 class="anchored" data-anchor-id="total-abundance-and-quadrat-data">Total abundance and quadrat data:</h4>
@@ -499,8 +500,8 @@ sample estimates:
 0.05023005 </code></pre>
 </div>
 </div>
-<p>Here, we finally get some interesting results!! The correlation between live vegetation &amp; total abundance is positive and statistically significant! Also, leaf litter &amp;total abundance is negatively correlated and statistically significant. Both bare ground &amp; total abundance, and rocks/stones &amp; total abundance aren’t statistically significant and are negatively and positively correlated, respectively. Just remember that correlation does not imply causation!</p>
-<p>This brings us to the end of our sample analyses! Thanks for reading, and happy analyses!</p>
+<p>Here, we finally get some interesting results!! The correlation between live vegetation &amp; total abundance is positive and statistically significant! Also, leaf litter &amp; total abundance is negatively correlated and statistically significant. Both bare ground &amp; total abundance, and rocks/stones &amp; total abundance aren’t statistically significant and are negatively and positively correlated, respectively. Just remember that correlation does not imply causation!</p>
+<p>This brings us to the end of this demonstratory analyses, but there is far more that we can do with this data set! Thanks for reading, and happy analyses!</p>
 </section>
 </section>
 </section>
