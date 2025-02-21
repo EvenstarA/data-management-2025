@@ -10,7 +10,7 @@ The data includes ant genus/species names, species counts, and percentage cover 
 
 In addition to the RScript, a more thorough, step-by-step guide to my thought process is documented in a more user-friendly manner in the analyses_quarto.qmd and analyses_quarto.html files. These files include written paragraphs and code chunks, extra details into the functions and packages used, and the justification behind my analysis and coding process. It is intended for those less familiar with R, to guide them through the coding process. If there are issues with running the main RScript (but hopefully there aren't), the Quarto document may hold a clearer explanation which may assist in troubleshooting. 
 
-To replicate the analyses, you can follow this link to run the session online through MyBinder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/EvenstarA/data-management-2025/HEAD)
+To replicate the analyses, you can follow this link to run the session online through MyBinder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/EvenstarA/data-management-2025/HEAD). 
 
 Alternatively, you will need to download the following files from this repository to your computer if you want to run it offline. It may be beneficial to read the session_info file for software details. 
 - analyses.R
