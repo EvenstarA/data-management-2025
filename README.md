@@ -1,5 +1,7 @@
 # data-management-2025
 
+MyBinder Link: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/EvenstarA/data-management-2025/HEAD)
+
 Repository for Data Management Honours Module at UCT (2025).
 
 The purpose of this repository is to fulfil an assignment for the Honour's Data Management Course, 2025.
