@@ -7,7 +7,7 @@
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 # Preamble: --==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
-# The data set we will analyse involves pitfall trapped ants collected from two different vegetation types - Fynbos and Eucalyptus/Gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the sample site where each pitfall trap was placed. This analysis is simple and rudimentary. It is intended to provide a basic overview of the data set and to identify any potential relationships between the variables, for the purpose of the Data Management Honours Module, 2025
+# The data set we will analyse involves pitfall trapped ants collected from two different vegetation types - Fynbos and Eucalyptus/Gum trees. The data set contains species counts, species names and quantitative soil surface data, collected using a quadrat placed over the sample site where each pitfall trap was placed. This analysis is simple and rudimentary, and is intended to provide a basic overview of the data set and to identify potential relationships between the variables, for the purpose of the Data Management Honours Module, 2025
 # --==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--
 
 
@@ -49,7 +49,7 @@ sum(duplicated(pitfall.dat))
 
 # Suggested analyses (Branch Point 1 in GitHub log): ----
 
-### total abundances per sample site/pitfall trap----
+### Total abundances per sample site/pitfall trap----
 
 # create a new column with the total abundance per trap
 
@@ -57,7 +57,7 @@ pitfall_total_abundance <- pitfall.dat %>%
   group_by(pitfall) %>%
   mutate(total_abundance = rowSums(across(everything())))
 
-### total species richness per sample site/pitfall trap ----
+### Total species richness per sample site/pitfall trap ----
 
 # create a new column with species richness per trap 
 
@@ -66,6 +66,7 @@ pitfall_species_richness <- pitfall.dat %>%
   mutate(species_richness = rowSums(across(everything()) > 0))
 
 # combine abundance, species richness and original pitfall data into original data frame:
+
 pitfall.dat <- pitfall.dat %>%
   left_join(pitfall_total_abundance) %>%
   left_join(pitfall_species_richness)
@@ -78,10 +79,11 @@ pitfall.dat <- pitfall.dat %>%
     str_detect(pitfall, "F") ~ "F"
   ))
 
-# check new variable site_type is a factor with 2 levels:
+# check new variable veg_type is a factor with 2 levels:
+
 str(pitfall.dat)
 pitfall.dat$veg_type <- as.factor(pitfall.dat$veg_type)
-str(pitfall.dat) # site_type is now a factor
+str(pitfall.dat) # veg_type is now a factor
 
 
 
@@ -100,6 +102,7 @@ ggplot(pitfall.dat, aes(x = pitfall, y = total_abundance)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # boxplot of total abundance between vegetation types:
+
 ggplot(pitfall.dat, aes(x = veg_type, y = total_abundance)) +
   geom_boxplot() +
   labs(title = "Total abundance of ants (count) between vegetation types",
@@ -111,6 +114,7 @@ ggplot(pitfall.dat, aes(x = veg_type, y = total_abundance)) +
 ## Species richness plots: ----
 
 # bar chart of species richness per sample site/pitfall trap 
+
 ggplot(pitfall.dat, aes(x = pitfall, y = species_richness)) +
   geom_bar(stat = "identity") +
   labs(title = "Species richness per pitfall trap",
@@ -120,6 +124,7 @@ ggplot(pitfall.dat, aes(x = pitfall, y = species_richness)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # boxplot of species richness between vegetation types
+
 ggplot(pitfall.dat, aes(x = veg_type, y = species_richness)) +
   geom_boxplot() +
   labs(title = "Species richness between vegetation types",
@@ -148,15 +153,17 @@ chisq.test(pitfall.dat$species_richness, pitfall.dat$veg_type)
 
 ## Assessing correlation between quadrat variables and species richness/total abundance ----
 
-# separate the 4 columns of quadrat data from quad.dat into a new data frame:
+# separate the 4 necessary columns of quadrat data from quad.dat into a new data frame:
+
 quad_vars <- quad.dat %>%
   select(live.veg.pcover, leaf.litter.pcover, bare.ground.pcover, rocks.stones.pcover)
 
 # combine quad_vars with the pitfall.dat
+
 pitfall.quad.dat <- cbind(pitfall.dat, quad_vars)
  
 
-# run correlation tests between quadrat variables and species richness: (could likely use a function but this is beyond my expertise)
+# run correlation tests between quadrat variables and species richness: (could likely use a function for this, but that is beyond my current expertise)
 
 cor.test(pitfall.quad.dat$live.veg.pcover, pitfall.quad.dat$species_richness)
 
@@ -178,7 +185,7 @@ cor.test(pitfall.quad.dat$bare.ground.pcover, pitfall.quad.dat$total_abundance)
 cor.test(pitfall.quad.dat$rocks.stones.pcover, pitfall.quad.dat$total_abundance)
 
 
-# End ----
+# End of basic analyses ----
 
 # Session info: -----
 # R version 4.4.2 (2024-10-31 ucrt)
